@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Your Application (assuming it's already running on localhost:3000)
+  # If you need to run your app in Docker too, add it here
+  
+  # Cypress Test Runner
+  cypress:
+    image: cypress/included:15.7.1-node-24.11.1-chrome-143.0.7499.40-1-ff-145.0.2-edge-142.0.3595.94-1
+    container_name: cypress-e2e
+    working_dir: /e2e
+    environment:
+      - CYPRESS_baseUrl=http://host.docker.internal:3000
+      - CYPRESS_video=true
+      - CYPRESS_videoCompression=32
+      - CYPRESS_screenshotOnRunFailure=true
+      - CYPRESS_defaultCommandTimeout=10000
+      - CYPRESS_requestTimeout=10000
+    volumes:
+      # Mount test files
+      - ./cypress:/e2e/cypress
+      - ./cypress.config.ts:/e2e/cypress.config.ts
+      # Mount results directories
+      - ./cypress/videos:/e2e/cypress/videos
+      - ./cypress/screenshots:/e2e/cypress/screenshots
+      - ./cypress/results:/e2e/cypress/results
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - cypress-network
+    command: >
+      sh -c "
+        echo 'Starting Cypress tests...' &&
+        npx cypress run --spec 'cypress/e2e/home.cy.ts,cypress/e2e/cart.cy.ts,cypress/e2e/product-detail.cy.ts' --browser chrome
+      "
+
+networks:
+  cypress-network:
+    driver: bridge
