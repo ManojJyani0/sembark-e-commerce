@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import type { CartItem } from "~/types/cart";
 import { Link } from "react-router";
 import { useCart } from "~/context/cart";
+import { currencyFormatter } from "~/utils";
 
 interface CartItemCardProps {
   item: CartItem;
@@ -135,7 +136,7 @@ export function CartItemCard({
             </Link>
             <p className="text-xs text-gray-600 capitalize">{item.category}</p>
             <p className="text-sm font-medium text-gray-900 mt-1">
-              ${item.price.toFixed(2)} × {item.quantity}
+              {currencyFormatter(item.price)} × {item.quantity}
             </p>
           </div>
         </div>
@@ -143,7 +144,7 @@ export function CartItemCard({
         {/* Actions */}
         <div className="flex items-center space-x-3">
           <span className="text-sm font-semibold text-gray-900">
-            ${itemTotal.toFixed(2)}
+            {currencyFormatter(itemTotal)}
           </span>
           <button
             onClick={handleRemove}
@@ -253,10 +254,10 @@ export function CartItemCard({
           {/* Price and Total */}
           <div className="text-right">
             <p className="text-lg font-semibold text-gray-900">
-              ${itemTotal.toFixed(2)}
+             {currencyFormatter(itemTotal)}
             </p>
             <p className="text-sm text-gray-600">
-              ${item.price.toFixed(2)} each
+              {currencyFormatter(itemTotal)} each
             </p>
           </div>
         </div>

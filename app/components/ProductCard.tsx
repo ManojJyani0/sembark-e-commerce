@@ -3,6 +3,7 @@ import type { Product } from "~/types";
 import { AddToCartButton } from "./AddToCart";
 import { Link } from "react-router";
 import RattingStars from "./RattingStars";
+import { currencyFormatter } from "~/utils";
 
 type Props = {
   product: Product;
@@ -36,10 +37,7 @@ export function ProductCard({ product }: Props) {
                 <h6 className="text-sm sm:text-base font-bold text-slate-900">
                   {/* todo we can add here to toggle inr and usd exchange rate also since this data is only for dollar not for inr
                    */}
-                  {new Intl.NumberFormat("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                  }).format(product.price)}
+                  {currencyFormatter(product.price)}
                 </h6>
               </div>
               <RattingStars {...product.rating} />

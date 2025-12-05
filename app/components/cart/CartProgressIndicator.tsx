@@ -1,5 +1,6 @@
 import React from 'react';
 import { useCart } from '~/context/cart';
+import { currencyFormatter } from '~/utils';
 
 
 export function CartProgressIndicator() {
@@ -29,7 +30,7 @@ export function CartProgressIndicator() {
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
       <div className="mb-3">
         <div className="flex justify-between text-sm text-blue-800 mb-1">
-          <span>Free shipping at ${freeShippingThreshold}</span>
+          <span>Free shipping at {currencyFormatter(freeShippingThreshold)}</span>
           <span>${remaining.toFixed(2)} to go</span>
         </div>
         <div className="w-full bg-blue-200 rounded-full h-2">
@@ -40,7 +41,7 @@ export function CartProgressIndicator() {
         </div>
       </div>
       <p className="text-sm text-blue-700">
-        Add ${remaining.toFixed(2)} more to get <span className="font-semibold">FREE shipping!</span>
+        Add {currencyFormatter(remaining)} more to get <span className="font-semibold">FREE shipping!</span>
       </p>
     </div>
   );

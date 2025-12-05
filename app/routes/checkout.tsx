@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router";
 import { useCart } from "~/context/cart";
 import type { Route } from "./+types/checkout";
+import { currencyFormatter } from "~/utils";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -113,10 +114,10 @@ export default function CheckoutPage() {
               <div className="flex justify-between">
                 <span className="text-gray-600">Items ({totalItems})</span>
                 <span>
-                  $
-                  {items
+                 
+                  {currencyFormatter(items
                     .reduce((sum, item) => sum + item.price * item.quantity, 0)
-                    .toFixed(2)}
+                    )}
                 </span>
               </div>
               <div className="flex justify-between">

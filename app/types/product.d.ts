@@ -12,6 +12,7 @@ export interface Product {
   category: string;
   image: string;
   rating: Rating;
+
 }
 
 export interface CreateProductDto {
@@ -27,6 +28,7 @@ export interface UpdateProductDto extends Partial<CreateProductDto> {
 }
 
 export interface ProductFilters {
+  search?: string;
   category?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -35,6 +37,7 @@ export interface ProductFilters {
   offset?: number;
   sortBy?: 'price' | 'rating' | 'title';
   order?: 'asc' | 'desc';
+  inStock?: boolean
 }
 
 export interface ProductsResponse {

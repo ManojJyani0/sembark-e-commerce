@@ -39,21 +39,19 @@ export async function loader({ request }: Route.LoaderArgs) {
     const result = await productService.getAllProducts(searchParams);
 
     // Group products by category with performance optimization
-    const grouped = result.products.reduce<Record<string, Product[]>>(
-      (acc, product) => {
-        const category = product.category.trim();
-        if (!acc[category]) {
-          acc[category] = [];
-        }
-        acc[category].push(product);
-        return acc;
-      },
-      {}
-    );
+    // const grouped = result.products.reduce<Record<string, Product[]>>(
+    //   (acc, product) => {
+    //     const category = product.category.trim();
+    //     if (!acc[category]) {
+    //       acc[category] = [];
+    //     }
+    //     acc[category].push(product);
+    //     return acc;
+    //   },
+    //   {}
+    // );
     return {
       products: result.products,
-      grouped,
-      categories: Object.keys(grouped).sort(),
       total: result.products.length,
       timestamp: Date.now(),
     };
@@ -145,53 +143,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     refetchOnWindowFocus: false,
   });
-
-  // Store categories in localStorage for persistence
-  useEffect(() => {
-    try {
-      if (productsData?.categories) {
-        localStorage.setItem(
-          "categoryList",
-          JSON.stringify(productsData.categories)
-        );
-        localStorage.setItem(
-          "lastProductFetch",
-          productsData.timestamp.toString()
-        );
-      }
-    } catch (err) {
-      console.warn("Failed to store categories in localStorage:", err);
-    }
-  }, [productsData?.categories, productsData?.timestamp]);
-
-  // Memoize category check function
-  const isCategorySelected = useCallback(
-    (category: string) => {
-      if (selectedCategories.length === 0) return true;
-      return selectedCategories.includes(category);
-    },
-    [selectedCategories]
+  const totalProductCount = useMemo(
+    () => productsData.products.length,
+    [productsData]
   );
-
-  // Memoize grouped products for performance
-  const groupedProducts = useMemo(() => {
-    return productsData?.grouped || {};
-  }, [productsData?.grouped]);
-
-  // Get sorted categories
-  const sortedCategories = useMemo(() => {
-    return Object.keys(groupedProducts).sort();
-  }, [groupedProducts]);
-
-  // Calculate total visible products
-  const totalVisibleProducts = useMemo(() => {
-    return sortedCategories.reduce((total, category) => {
-      if (isCategorySelected(category)) {
-        return total + groupedProducts[category].length;
-      }
-      return total;
-    }, 0);
-  }, [sortedCategories, groupedProducts, isCategorySelected]);
 
   // Loading state
   if (isLoading) {
@@ -222,28 +177,48 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   }
 
   // No products found
-  if (sortedCategories.length === 0) {
+  if (totalProductCount === 0) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <svg
-          className="w-16 h-16 text-gray-400 mx-auto mb-4"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-          />
-        </svg>
-        <h2 className="text-2xl font-semibold text-gray-700 mb-2">
-          No Products Found
-        </h2>
-        <p className="text-gray-600">
-          Try adjusting your filters or check back later.
-        </p>
+      <div>
+        {/* Category Stats */}
+        <div className="bg-white ">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">
+                  {selectedCategories.length > 0
+                    ? `Products in ${selectedCategories.join(", ")}`
+                    : "All Products"}
+                </h1>
+                <p className="text-sm text-gray-600">
+                  Showing {totalProductCount} of {productsData.total} products
+                </p>
+              </div>
+              <CategoryFilter selectedCategories={selectedCategories} />
+            </div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-12 text-center">
+          <svg
+            className="w-16 h-16 text-gray-400 mx-auto mb-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+            />
+          </svg>
+          <h2 className="text-2xl font-semibold text-gray-700 mb-2">
+            No Products Found
+          </h2>
+          <p className="text-gray-600">
+            Try adjusting your filters or check back later.
+          </p>
+        </div>
       </div>
     );
   }
@@ -261,13 +236,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   : "All Products"}
               </h1>
               <p className="text-sm text-gray-600">
-                Showing {totalVisibleProducts} of {productsData.total} products
+                Showing {totalProductCount} of {productsData.total} products
               </p>
             </div>
-            <CategoryFilter
-              categories={productsData.categories}
-              selectedCategories={selectedCategories}
-            />
+            <CategoryFilter selectedCategories={selectedCategories} />
           </div>
         </div>
       </div>
@@ -275,46 +247,29 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       {/* Main content */}
       <main className="container mx-auto px-4 py-6">
         <div className="grid gap-8">
-          {sortedCategories.map(
-            (category) =>
-              isCategorySelected(category) && (
-                <section
-                  key={category}
-                  className="bg-white rounded-xl shadow-sm  p-4 md:p-6"
-                >
-                  <div className="flex justify-between items-center mb-6">
-                    <div>
-                      <h2 className="text-xl md:text-2xl font-bold text-gray-900 capitalize">
-                        {category}
-                      </h2>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {groupedProducts[category].length} products
-                      </p>
-                    </div>
-                    <a
-                      href={`/category/${category.toLowerCase()}`}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      View all →
-                    </a>
-                  </div>
+          <section className="bg-white rounded-xl shadow-sm  p-4 md:p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900 capitalize">
+                  All products
+                </h2>
+              </div>
+            </div>
 
-                  <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-                    {groupedProducts[category].map((product) => (
-                      <ProductCard
-                        key={`${product.id}-${product.sku || product.title}`}
-                        product={product}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )
-          )}
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+              {productsData.products.map((product) => (
+                <ProductCard
+                  key={`${product.id}-${product.title}`}
+                  product={product}
+                />
+              ))}
+            </div>
+          </section>
         </div>
       </main>
 
       {/* Empty state when no categories match filters */}
-      {totalVisibleProducts === 0 && selectedCategories.length > 0 && (
+      {totalProductCount === 0 && selectedCategories.length > 0 && (
         <div className="container mx-auto px-4 py-12 text-center">
           <div className="max-w-md mx-auto">
             <svg

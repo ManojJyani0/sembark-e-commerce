@@ -52,7 +52,7 @@ function Review({review}: ReviewProps) {
             <h4 className="text-slate-900 text-sm font-semibold">{review.name}</h4>
             <div className="flex space-x-1 mt-1">
                 <RattingStars rate={review.rating} count={0} />
-              <p className="text-xs text-slate-500 !ml-2">2 months ago</p>
+              <p className="text-xs text-slate-500 !ml-2">{review.date}</p>
             </div>
             <p className="text-sm text-slate-500 mt-4">{review.comment}
             </p>

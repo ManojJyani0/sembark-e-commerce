@@ -5,6 +5,7 @@ import { productService } from "~/services/product";
 import RattingStars from "~/components/RattingStars";
 import CustomerReview from "~/components/CustomerReview";
 import { useNavigate, useNavigation } from "react-router";
+import { currencyFormatter } from "~/utils";
 
 // provides `loaderData` to the component
 export async function loader({ params }: Route.LoaderArgs) {
@@ -69,12 +70,9 @@ export default function Component({ loaderData,  }: Route.ComponentProps) {
               </p>
               <div className="flex items-center flex-wrap gap-4 mt-6">
                 <h4 className="text-slate-900 text-2xl sm:text-3xl font-semibold">
-                  $12
+                  {currencyFormatter(loaderData.price)}
                 </h4>
-                <p className="text-slate-500 text-lg">
-                  <strike>$16</strike>{" "}
-                  <span className="text-sm ml-1.5">Tax included</span>
-                </p>
+               
               </div>
               <div className="flex items-center gap-4 mt-4">
                 <RattingStars {...loaderData.rating} />
