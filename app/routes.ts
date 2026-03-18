@@ -10,6 +10,7 @@ export default [
     layout("layout/index.tsx", [
         index("routes/home.tsx"),
         route("cart", "routes/cart.tsx"),
+        route("wishlist", "routes/wishlist.tsx"),
         route("checkout", "routes/checkout.tsx"),
         ...prefix("product", [
             route(":id", "routes/productDetails.tsx"),

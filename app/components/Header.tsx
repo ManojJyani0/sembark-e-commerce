@@ -1,14 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { useCart } from "~/context/cart";
+import { useWishlist } from "~/hook/useLocalStore";
 
 type Props = {};
 
-export function Header({}: Props) {
+export function Header({ }: Props) {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const { totalItems } = useCart();
+  const {totalCount:totalWishlistCount} = useWishlist()
 
   const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -183,6 +185,31 @@ export function Header({}: Props) {
                 View Cart ({totalItems} items)
               </span>
             </Link>
+            {/* Cart Navigation */}
+            <Link
+              to="/wishlist"
+              className="relative shrink-0 p-2 hover:bg-gray-100 rounded-lg transition-colors group"
+              aria-label={`Shopping cart with ${totalWishlistCount} items`}
+            >
+              <div className="relative">
+                {/* Cart Icon */}
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#000000" />
+                </svg>
+
+                {/* Item Count Badge */}
+                {totalWishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-sm">
+                    {totalWishlistCount > 99 ? "99+" : totalWishlistCount}
+                  </span>
+                )}
+              </div>
+
+              {/* Optional: Tooltip on hover */}
+              <span className="absolute -bottom-8 right-0 bg-gray-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                View Wishlist ({totalWishlistCount} items)
+              </span>
+            </Link>
           </div>
 
           {/* Mobile Search Bar (Expanded) */}
@@ -223,7 +250,7 @@ export function Header({}: Props) {
         </div>
       </div>
 
-      <style  jsx>{`
+      <style jsx>{`
         .hide-scrollbar {
           -ms-overflow-style: none;
           scrollbar-width: none;
