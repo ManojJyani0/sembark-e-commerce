@@ -4,54 +4,76 @@ import { AddToCartButton } from "./AddToCart";
 import { Link } from "react-router";
 import RattingStars from "./RattingStars";
 import { currencyFormatter } from "~/utils";
+import { LocalStoreKey } from "~/constant/localStoreKeys";
+import { useWishlist } from "~/hook/useLocalStore";
 
 type Props = {
   product: Product;
 };
 
 export function ProductCard({ product }: Props) {
+  const { hasProductInWishlist } = useWishlist()
+  async function handleAddToWishlist() {
+    try {
+      const data = localStorage.getItem(LocalStoreKey.Wishlist);
+      if (data !== null) {
+        const wishlist = await JSON.parse(data) as Array<Product>;
+
+        const findIndex = wishlist.findIndex(item => item.id == product.id);
+        if (findIndex >= 0) {
+          alert('Product all-ready in wishlist')
+        } else {
+          localStorage.setItem(LocalStoreKey.Wishlist, JSON.stringify([wishlist, product]));
+        }
+      } else {
+        localStorage.setItem(LocalStoreKey.Wishlist, JSON.stringify([product]));
+      }
+    } catch (error) {
+    }
+  }
   return (
-    
-      <div className="bg-white flex flex-col overflow-hidden hover:shadow-md transition-all">
-        <div className="w-full bg-gray-50">
-          <a href="javascript:void(0)" className="block">
-            <img
-              src={product?.image}
-              alt="Product 1"
-              className="w-full object-fill object-top aspect-230/307"
-            />
-          </a>
-        </div>
-        <div className="p-2 flex-1 flex flex-col">
-          <div className="flex-1">
-            <Link to={`/product/${product.id}`} className="block border-0 outline-0">
-              <h5 className="text-sm sm:text-base font-semibold text-slate-900 truncate">
-                {product.title}
-              </h5>
-            </Link>
-            <p className="text-sm mt-1 text-slate-600 truncate">
-              {product.description}
-            </p>
-            <div className="flex flex-wrap justify-between gap-2 mt-3">
-              <div className="flex gap-2">
-                <h6 className="text-sm sm:text-base font-bold text-slate-900">
-                  {/* todo we can add here to toggle inr and usd exchange rate also since this data is only for dollar not for inr
+
+    <div className="bg-white flex flex-col overflow-hidden hover:shadow-md transition-all">
+      <div className="w-full bg-gray-50">
+        <a href="javascript:void(0)" className="block">
+          <img
+            src={product?.image}
+            alt="Product 1"
+            className="w-full object-fill object-top aspect-230/307"
+          />
+        </a>
+      </div>
+      <div className="p-2 flex-1 flex flex-col">
+        <div className="flex-1">
+          <Link to={`/product/${product.id}`} className="block border-0 outline-0">
+            <h5 className="text-sm sm:text-base font-semibold text-slate-900 truncate">
+              {product.title}
+            </h5>
+          </Link>
+          <p className="text-sm mt-1 text-slate-600 truncate">
+            {product.description}
+          </p>
+          <div className="flex flex-wrap justify-between gap-2 mt-3">
+            <div className="flex gap-2">
+              <h6 className="text-sm sm:text-base font-bold text-slate-900">
+                {/* todo we can add here to toggle inr and usd exchange rate also since this data is only for dollar not for inr
                    */}
-                  {currencyFormatter(product.price)}
-                </h6>
-              </div>
-              <RattingStars {...product.rating} />
+                {currencyFormatter(product.price)}
+              </h6>
             </div>
+            <RattingStars {...product.rating} />
           </div>
-          <div className="flex items-center gap-2 mt-4">
-            <div
-              className="bg-pink-200 hover:bg-pink-300 w-12 h-9 flex items-center justify-center rounded-sm cursor-pointer"
-              title="Wishlist"
-            >
+        </div>
+        <div className="flex items-center gap-2 mt-4">
+          <div
+            className="bg-pink-200 hover:bg-pink-300 w-12 h-9 flex items-center justify-center rounded-sm cursor-pointer"
+            title="Wishlist"
+          >
+            <button onClick={handleAddToWishlist}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16px"
-                className="fill-pink-600 inline-block"
+                className={`fill-pink-${hasProductInWishlist(product.id) ? 800 : 600} inline-block`}
                 viewBox="0 0 64 64"
               >
                 <path
@@ -59,10 +81,11 @@ export function ProductCard({ product }: Props) {
                   data-original="#000000"
                 />
               </svg>
-            </div>
-            <AddToCartButton product={product} />
+            </button>
           </div>
+          <AddToCartButton product={product} />
         </div>
       </div>
+    </div>
   );
 }
